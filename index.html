@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bidding Machine</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+        .container {
+            width: 60%;
+            margin: auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            font-size: 14px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .message {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        #bidHistory {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .bid-entry {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Bidding Machine</h1>
+        
+        <!-- Bid Form -->
+        <div class="form-group">
+            <label for="username">Username:</label>
+            <input type="text" id="username" placeholder="Enter your username">
+        </div>
+        <div class="form-group">
+            <label for="bid_amount">Bid Amount:</label>
+            <input type="number" id="bid_amount" placeholder="Enter bid amount">
+        </div>
+        <button onclick="placeBid()">Place Bid</button>
+        
+        <!-- Highest Bid Message -->
+        <div class="message" id="highestBidMessage">Highest Bid: None</div>
+        
+        <!-- Bid History -->
+        <div id="bidHistory">
+            <h3>Bid History:</h3>
+            <div id="historyMessage">No bids placed yet.</div>
+        </div>
+    </div>
+
+
+    <script>
+        // Initialize empty arrays for bids and bid history
+        let bids = [];
+        let bidHistory = [];
+
+
+        // Function to place a bid
+        function placeBid() {
+            const username = document.getElementById("username").value;
+            const bidAmount = parseInt(document.getElementById("bid_amount").value);
+
+
+            if (!username || isNaN(bidAmount) || bidAmount <= 0) {
+                alert("Please provide valid inputs!");
+                return;
+            }
+
+
+            // Add the bid to the bids array (using max-heap concept)
+            addBid(username, bidAmount);
+
+
+            // Add bid to history
+            bidHistory.push({ username, bidAmount });
+
+
+            // Update the UI
+            updateHighestBid();
+            updateBidHistory();
+        }
+
+
+        // Function to add bid using max-heap concept
+        function addBid(username, bidAmount) {
+            // Insert the new bid into the array and maintain the max-heap property
+            bids.push({ username, bidAmount });
+            heapifyUp(bids.length - 1);
+        }
+
+
+        // Function to ensure the max-heap property (bigger bids are at the top)
+        function heapifyUp(index) {
+            let currentIndex = index;
+            while (currentIndex > 0) {
+                let parentIndex = Math.floor((currentIndex - 1) / 2);
+                if (bids[currentIndex].bidAmount > bids[parentIndex].bidAmount) {
+                    // Swap the current bid with the parent
+                    [bids[currentIndex], bids[parentIndex]] = [bids[parentIndex], bids[currentIndex]];
+                    currentIndex = parentIndex;
+                } else {
+                    break;
+                }
+            }
+        }
+
+
+        // Function to get the highest bid from the max-heap
+        function getHighestBid() {
+            if (bids.length > 0) {
+                return bids[0]; // Root of the max-heap is always the highest bid
+            } else {
+                return null;
+            }
+        }
+
+
+        // Function to update the highest bid message on the UI
+        function updateHighestBid() {
+            const highestBid = getHighestBid();
+            const messageElement = document.getElementById("highestBidMessage");
+
+
+            if (highestBid) {
+                messageElement.innerHTML = `Highest Bid: ${highestBid.bidAmount} by ${highestBid.username}`;
+            } else {
+                messageElement.innerHTML = "Highest Bid: None";
+            }
+        }
+
+
+        // Function to update the bid history on the UI
+        function updateBidHistory() {
+            const historyMessageElement = document.getElementById("historyMessage");
+            if (bidHistory.length > 0) {
+                historyMessageElement.innerHTML = bidHistory.map(bid => 
+                    `<div class="bid-entry">${bid.username}: $${bid.bidAmount}</div>`
+                ).join('');
+            } else {
+                historyMessageElement.innerHTML = "No bids placed yet.";
+            }
+        }
+    </script>
+</body>
+</html>
+
